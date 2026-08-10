@@ -1,0 +1,26 @@
+NOTES
+
+- Old matches are calced different and don't include passive kills / are formatted differently. The parser still handles them fine though
+
+- H-Zoroark messes things up so any game with him in it needs its stats to be double checked (see: nick half vs damian) 
+  - This is accurate up to week 11
+
+- In the event of a forfeit, the loser's pokemon will all be counted as having died once (see: diego vs sinow)
+
+- From Kenneth, after KKirby vs ultrashxt: "(for my purposes im gonna note that 1 of the last 2 kills here wouldve went to gastrodon (mega larp was gauranteed dead to rocks damage that gastrodon set up) and i was gonna bring in base rotom to kill necrozma before drew ff'd so base rotom gets 1)" 
+    - because I really don't care otherwise i will agree
+
+- From Kenneth (again), after yofanto vs Rikero: "(for kill counting purposes awarding sam with a 4-0 win and iron leaves with 3 more kills putting it at 5 for the game)"
+    - okay sure fair's fair
+
+- From me, after KlexSparker vs UrineStar: This game was a forfeit, and Celesteela was about to get the last kill, so it's credited with an extra kill and Hitmontop is credited with a death.
+    - See the last two turns: https://replay.pokemonshowdown.com/gen9natdexdraft-2662411526
+
+- From me (again), after HatsuneMikuNo1Fan vs UrinesStar: Another forfeit, and Ogrepon was about to get the last kill on Mega Clefable, so see above.
+    - Replay: https://replay.pokemonshowdown.com/gen9natdexdraft-2662419537
+
+- From quotewithcoffee vs 86S2When: This was a forfeit, but idk who to give the kills to, so I didn't do anything here
+
+- From ahphilosophy vs degs223: Porygon just broke here entirely so the data was entered manually by Easton, if it's wrong then it's his fault
+
+- For some reason Porygon saved Paldean Tauros Aqua as both "Tauros-Paldea (Aqua)" and "Tauros-Paldea-Aqua". I've updated the data to make them all "Tauros-Paldea-Aqua."
