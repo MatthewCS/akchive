@@ -45,9 +45,13 @@ class MatchResults(object):
     player_2: str = ""
     winner: str = ""
     margin_of_victory: int = 0
-    player_1_pokemon: list[PokemonStats] = []
-    player_2_pokemon: list[PokemonStats] = []
     replay_url: str = ""
+    disqualified: bool = False
+    dq_info: str = ""
+    p1_dq_score: int = 0
+    p2_dq_score: int = 0
+    player_1_pokemon: list[PokemonStats]
+    player_2_pokemon: list[PokemonStats]
 
     def __init__(self):
         # If I don't do it this way then there's tomfoolery with pointers
@@ -76,7 +80,29 @@ class MatchResults(object):
             > 0
         )
 
+    def disqualify(
+        self, dq_info: str, p1_change: int, p2_change: int, winner: str | None = None
+    ) -> None:
+        self.disqualified = True
+        self.dq_info = dq_info
+        self.replay_url = ""
+        self.p1_dq_score = p1_change
+        self.p2_dq_score = p2_change
+
+        if winner:
+            self.winner = winner
+
     def __str__(self):
+        if self.disqualify:
+            return (
+                f"{self.player_1} vs {self.player_2}\n"
+                + "\n"
+                + "This match was disqualified.\n"
+                + f"{self.player_1}: {self.p1_dq_score}\n"
+                + f"{self.player_2}: {self.p2_dq_score}\n"
+                + "\n"
+                + f"Info: {self.dq_info}"
+            )
         return (
             f"{self.player_1} vs {self.player_2}\n"
             + "\n"

@@ -17,6 +17,7 @@ TEST_REPLACEMENTS_FP = "./input/season_2/player info/replacements.json"
 # Regular season info
 TEST_MESSAGES_FP = "./input/season_2/regular season/games.txt"
 TEST_SCHEDULE_FP = "./input/season_2/regular season/schedule.csv"
+TEST_DQ_FP = "./input/season_2/regular season/disqualifications.json"
 # Bowl info
 TEST_BOWL_MESSAGES_FP = "./input/season_2/bowls/bowl_games.txt"
 TEST_BOWL_SCHEDULE_FP = "./input/season_2/bowls/bowl_schedule.json"
@@ -34,9 +35,15 @@ def read_test_files():
     test_aliases = {}
     test_replacements = {}
     test_schedule = {}
+    test_dqs = {}
 
     with open(TEST_MESSAGES_FP, "r") as f:
         test_messages = f.read()
+
+    test_schedule = schedule_from_csv(TEST_SCHEDULE_FP)
+
+    with open(TEST_DQ_FP, "r") as f:
+        test_dqs = json.load(f)
 
     with open(TEST_DIVISIONS_FP, "r") as f:
         test_divisions = json.load(f)
@@ -46,8 +53,6 @@ def read_test_files():
 
     with open(TEST_REPLACEMENTS_FP, "r") as f:
         test_replacements = json.load(f)
-
-    test_schedule = schedule_from_csv(TEST_SCHEDULE_FP)
 
     with open(TEST_BOWL_MESSAGES_FP, "r") as f:
         test_bowl_messages = f.read()
@@ -68,6 +73,7 @@ def read_test_files():
         test_aliases,
         test_replacements,
         test_schedule,
+        test_dqs,
         test_bowl_messages,
         test_bowl_schedule,
         test_postseason_messages,
@@ -84,6 +90,7 @@ if __name__ == "__main__":
         aliases,
         replacements,
         rs_schedule,
+        rs_disquals,
         bowl_contents,
         bowl_schedule,
         ps_contents,
@@ -94,14 +101,44 @@ if __name__ == "__main__":
     # Regular season
     rs_schedule = update_names_in_schedule(aliases["schedule names"], rs_schedule)
     rs_results_parser = ResultsParser(rs_contents, divisions, aliases, replacements)
-    rs_schedule_results = get_schedule_results(rs_schedule, rs_results_parser.results)
+    rs_schedule_results = get_schedule_results(
+        rs_schedule, rs_results_parser.results, rs_disquals
+    )
+    rs_trainer_stats = rs_results_parser.trainer_stats
+    for round in rs_schedule_results:
+        for result in rs_schedule_results[round]:
+            print(result)
+            if result.disqualified:
+                player_1_idx = [
+                    i
+                    for i, stats in enumerate(rs_trainer_stats)
+                    if stats.name == result.player_1
+                ][0]
+                player_2_idx = [
+                    i
+                    for i, stats in enumerate(rs_trainer_stats)
+                    if stats.name == result.player_2
+                ][0]
+
+                # Update player 1
+                rs_trainer_stats[player_1_idx].differential += result.p1_dq_score
+                if result.winner == result.player_1:
+                    rs_trainer_stats[player_1_idx].wins += 1
+                else:
+                    rs_trainer_stats[player_1_idx].losses += 1
+
+                # Update player 2
+                rs_trainer_stats[player_2_idx].differential += result.p2_dq_score
+                if result.winner == result.player_2:
+                    rs_trainer_stats[player_2_idx].wins += 1
+                else:
+                    rs_trainer_stats[player_2_idx].losses += 1
 
     # Bowl games
     bowl_schedule = update_names_in_bowl_schedule(
         aliases["schedule names"], bowl_schedule
     )
     bowl_results_parser = ResultsParser(bowl_contents, divisions, aliases, replacements)
-    print(bowl_results_parser.results)
     bowl_schedule_results = get_bowl_schedule_results(
         bowl_schedule, bowl_results_parser.results
     )
@@ -146,7 +183,7 @@ if __name__ == "__main__":
     exporters.export_data_xlsx(
         "./output/season 2.xlsx",
         rs_schedule_results,
-        rs_results_parser.trainer_stats,
+        rs_trainer_stats,
         bowl_schedule_results,
         bowl_results_parser.trainer_stats,
         awards_info,
@@ -157,7 +194,7 @@ if __name__ == "__main__":
     exporters.export_data_joblib(
         "./output/season 2.gzip",
         rs_schedule_results,
-        rs_results_parser.trainer_stats,
+        rs_trainer_stats,
         bowl_schedule_results,
         bowl_results_parser.trainer_stats,
         awards_info,

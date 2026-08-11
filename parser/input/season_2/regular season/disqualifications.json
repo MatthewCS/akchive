@@ -1,16 +1,16 @@
 {
-  "Round 8": [
+  "8": [
     {
       "Players": [
         {
           "Player": "Sassyflygon2",
           "Win Credited": false,
-          "Point change": -3
+          "Point Change": -3
         },
         {
           "Player": "yofanto",
           "Win Credited": false,
-          "Point change": -3
+          "Point Change": -3
         }
       ]
     },
@@ -19,44 +19,44 @@
         {
           "Player": "annmaloney5",
           "Win Credited": false,
-          "Point change": -3
+          "Point Change": -3
         },
         {
           "Player": "Awwstynn",
           "Win Credited": false,
-          "Point change": -3
+          "Point Change": -3
         }
       ]
     }
   ],
-  "Round 9": [
+  "9": [
     {
       "Players": [
         {
           "Player": "gnoccidelafortuna",
           "Win Credited": false,
-          "Point change": -3
+          "Point Change": -3
         },
         {
           "Player": "Awwstynn",
           "Win Credited": false,
-          "Point change": -3
+          "Point Change": -3
         }
       ]
     }
   ],
-  "Round 10": [
+  "10": [
     {
       "Players": [
         {
           "Player": "gabertater",
           "Win Credited": false,
-          "Point change": -3
+          "Point Change": -3
         },
         {
           "Player": "gnoccidelafortuna",
           "Win Credited": false,
-          "Point change": -3
+          "Point Change": -3
         }
       ]
     },
@@ -65,28 +65,28 @@
         {
           "Player": "Sassyflygon2",
           "Win Credited": false,
-          "Point change": -3
+          "Point Change": -3
         },
         {
           "Player": "ruben1001",
           "Win Credited": false,
-          "Point change": -3
+          "Point Change": -3
         }
       ]
     }
   ],
-  "Round 11": [
+  "11": [
     {
       "Players": [
         {
           "Player": "JCkayyyyy",
           "Win Credited": true,
-          "Point change": 3
+          "Point Change": 3
         },
         {
           "Player": "gnoccidelafortuna",
           "Win Credited": false,
-          "Point change": -3
+          "Point Change": -3
         }
       ]
     },
@@ -95,12 +95,12 @@
         {
           "Player": "DamianWhat",
           "Win Credited": true,
-          "Point change": 3
+          "Point Change": 3
         },
         {
           "Player": "ruben1001",
           "Win Credited": false,
-          "Point change": -3
+          "Point Change": -3
         }
       ]
     },
@@ -109,28 +109,28 @@
         {
           "Player": "UrineStar",
           "Win Credited": false,
-          "Point change": -3
+          "Point Change": -3
         },
         {
           "Player": "annmaloney5",
           "Win Credited": true,
-          "Point change": 3
+          "Point Change": 3
         }
       ]
     }
   ],
-  "Round 12": [
+  "12": [
     {
       "Players": [
         {
           "Player": "gabertater",
           "Win Credited": false,
-          "Point change": -3
+          "Point Change": -3
         },
         {
           "Player": "Jckayyyyy",
           "Win Credited": true,
-          "Point change": 3
+          "Point Change": 3
         }
       ]
     },
@@ -139,12 +139,12 @@
         {
           "Player": "akber000",
           "Win Credited": true,
-          "Point change": 3
+          "Point Change": 3
         },
         {
           "Player": "gnocchidelafortuna",
           "Win Credited": false,
-          "Point change": -3
+          "Point Change": -3
         }
       ]
     },
@@ -153,12 +153,12 @@
         {
           "Player": "Sassyflygon2",
           "Win Credited": false,
-          "Point change": -3
+          "Point Change": -3
         },
         {
           "Player": "DamianWhat",
           "Win Credited": true,
-          "Point change": 3
+          "Point Change": 3
         }
       ]
     },
@@ -167,12 +167,12 @@
         {
           "Player": "ultrashxt",
           "Win Credited": true,
-          "Point change": 3
+          "Point Change": 3
         },
         {
           "Player": "UrineStar",
           "Win Credited": false,
-          "Point change": -3
+          "Point Change": -3
         }
       ]
     },
@@ -181,12 +181,12 @@
         {
           "Player": "degs223",
           "Win Credited": true,
-          "Point change": 3
+          "Point Change": 3
         },
         {
           "Player": "Awwstynn",
           "Win Credited": false,
-          "Point change": -3
+          "Point Change": -3
         }
       ]
     }
