@@ -49,7 +49,7 @@ def build_matches(round: int | str, round_df, count_games_in_round: bool = True)
     if count_games_in_round:
         # How many games in this round have been played?
         games_in_round = round_df.shape[0]
-        games_unplayed = round_df[round_df["Winner"].isna()].shape[0]
+        games_unplayed = round_df[round_df["Winner"] == ""].shape[0]
         games_played = games_in_round - games_unplayed
 
         # If all games have been played
@@ -73,7 +73,7 @@ def build_matches(round: int | str, round_df, count_games_in_round: bool = True)
 
             with right:
                 # Has this game been played yet?
-                if not pd.isnull(row["Winner"]):
+                if row["Winner"]:
                     st.markdown(
                         f"Winner: **{row["Winner"]}** (**+{row["Margin of Victory"]}**)"
                     )
