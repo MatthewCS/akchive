@@ -23,11 +23,11 @@ class ResultsParser(object):
     _POKEMON_PARTIAL_STATS_RE = r"(.+) (\d+) (\d+)"
     _REPLAY_URL_RE = r"Replay: (\S+)"
     _HISTORY_URL_RE = r"History: (\S+)"
-    _divisions_data: dict[str, str] = {}
-    _alias_data: dict[str, dict[str, str]] = {}
-    _replacements_data: dict[str, str] = {}
-    trainer_stats: list[TrainerStats] = []
-    results: list[MatchResults] = []
+    _divisions_data: dict[str, str]
+    _alias_data: dict[str, dict[str, str]]
+    _replacements_data: dict[str, str]
+    trainer_stats: list[TrainerStats]
+    results: list[MatchResults]
 
     def __init__(
         self,
@@ -39,6 +39,8 @@ class ResultsParser(object):
         self._divisions_data = {}
         self._alias_data = {}
         self._replacements_data = {}
+        self.trainer_stats = []
+        self.results = []
 
         if divisions:
             for division, players in divisions.items():

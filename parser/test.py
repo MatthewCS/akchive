@@ -101,6 +101,7 @@ if __name__ == "__main__":
         aliases["schedule names"], bowl_schedule
     )
     bowl_results_parser = ResultsParser(bowl_contents, divisions, aliases, replacements)
+    print(bowl_results_parser.results)
     bowl_schedule_results = get_bowl_schedule_results(
         bowl_schedule, bowl_results_parser.results
     )
