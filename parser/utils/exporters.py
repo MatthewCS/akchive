@@ -23,6 +23,8 @@ def build_dataframes(
         "Winner",
         "Margin of Victory",
         "Replay URL",
+        "Disqualified",
+        "DQ Info",
     )
     match_performances_headers = (
         "Round",
@@ -58,6 +60,8 @@ def build_dataframes(
             match.winner,
             match.margin_of_victory,
             match.replay_url,
+            match.disqualified,
+            match.dq_info,
         ]
         for round in rs_match_results
         for match in rs_match_results[round]
