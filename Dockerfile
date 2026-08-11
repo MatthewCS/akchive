@@ -1,49 +1,38 @@
-# Stage 1: Build the Application
-# We use python:3.12 as the base for building and installing dependencies.
-FROM python:3.12 AS build
+FROM python:3.12 AS base
 
-# Set the working directory inside the container
-WORKDIR /usr/src/app
+ENV VIRTUAL_ENV=/app/.venv \
+  PATH="/app/.venv/bin:$PATH"
+
+
+FROM base AS runtime
+
+ENV POETRY_NO_INTERACTION=1 \
+  POETRY_VIRTUALENVS_IN_PROJECT=1 \
+  POETRY_VIRTUALENVS_CREATE=1 \
+  POETRY_CACHE_DIR=/tmp/poetry_cache
 
 # Install system dependencies if needed
-RUN apt-get update && apt-get install -y --no-install-recommends     build-essential     && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends curl build-essential \
+  && rm -rf /var/lib/apt/lists/*
 
-# Create a virtual environment
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-
-# Copy requirements.txt if it exists (using wildcard to avoid build failure)
-COPY requirements.tx[t] ./requirements.txt
-
-# Install Python dependencies only if requirements.txt exists
-RUN pip install --upgrade pip &&     if [ -f requirements.txt ]; then         pip install -r requirements.txt;     fi
-
-# Copy the rest of the application source code
-COPY . .
-
-# Stage 2: Create the Final Production Image
-# We use python:3.12 as the runtime image with all the necessary tools.
-FROM python:3.12
-
-# Set the working directory
-WORKDIR /usr/src/app
-
-# Copy the virtual environment from the build stage
-COPY --from=build /opt/venv /opt/venv
+# Install Poetry
+WORKDIR /app
+RUN pip install --no-cache-dir poetry==2.4.1
+# Install packages
+COPY pyproject.toml poetry.lock ./
+RUN poetry install --no-root && \
+  rm -rf ${POETRY_CACHE_DIR} 
 
 # Copy the application code
-COPY --from=build /usr/src/app .
-
-# Set the virtual environment as the active Python environment
-ENV PATH="/opt/venv/bin:$PATH"
-
-# Create a non-root user to run the application
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /usr/src/app
-USER appuser
+COPY . .
 
 # Expose the port your app runs on
 ENV PORT=8080
 EXPOSE $PORT
 
-# Define the command to start your application
-CMD ["run.sh"]
+# Healthcheck!
+HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
+
+# Run the app
+ENTRYPOINT ["poetry", "run", "streamlit", "run", "./website.py", "--server.port=8080", "--server.address=0.0.0.0"]

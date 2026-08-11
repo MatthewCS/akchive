@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for akchive on 2026-08-10T04:27:45Z
+# fly.toml app configuration file generated for akchive on 2026-08-10T00:45:04-04:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -7,11 +7,6 @@ app = 'akchive'
 primary_region = 'ewr'
 
 [build]
-  builder = 'paketobuildpacks/builder:base'
-
-[env]
-  PORT = '8080'
-
 [http_service]
   internal_port = 8080
   force_https = true
@@ -24,4 +19,4 @@ primary_region = 'ewr'
   memory = '1gb'
   cpu_kind = 'shared'
   cpus = 1
-  memory_mb = 256
+  memory_mb = 1024

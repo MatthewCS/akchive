@@ -1,19 +1,20 @@
 from .statistics import MatchResults, TrainerStats
 from datetime import datetime
+import joblib
 import pandas as pd
 
 
-def export_data_xlsx(
-    fp: str,
+def build_dataframes(
+    league_name: str,
     rs_match_results: dict[int, list[MatchResults]],
     rs_trainer_stats: list[TrainerStats],
     bowl_game_results: dict[str, MatchResults],
     bowl_trainer_stats: list[TrainerStats],
     awards: dict[str, dict[str, str]],
     trainer_replacements: dict[str, str],
-    league_name: str,
-    league_icon_fp: str = "",
-) -> None:
+) -> dict[str, pd.DataFrame]:
+    dfs_dict: dict[str, pd.DataFrame] = {}
+
     # These headers will be used for the regular season and postseason
     matches_summary_headers = (
         "Round",
@@ -169,7 +170,7 @@ def export_data_xlsx(
         [
             [
                 league_name,
-                None,
+                datetime.now(),
                 total_games_played,
                 remaining_games_count,
                 total_games_count,
@@ -179,7 +180,7 @@ def export_data_xlsx(
         columns=league_data_headers,
         index=None,
     )
-    match_summaries_df = pd.DataFrame(
+    rs_match_summaries_df = pd.DataFrame(
         rs_match_summaries, columns=matches_summary_headers, index=None
     )
     rs_match_performances_df = pd.DataFrame(
@@ -281,6 +282,97 @@ def export_data_xlsx(
         columns=awards_info_headers,
         index=None,
     )
+    #############################
+    #                           #
+    # Build the dataframes dict #
+    #                           #
+    #############################
+    dfs_dict["League Data"] = league_data_df
+
+    dfs_dict["(RS) Match Summaries"] = rs_match_summaries_df
+    dfs_dict["(RS) Match Performances"] = rs_match_performances_df
+    dfs_dict["(RS) Trainer Summaries"] = rs_trainer_summaries_df
+    dfs_dict["(RS) Trainer Pokémon"] = rs_trainer_summaries_df
+
+    dfs_dict["(BOWL) Game Summaries"] = bowl_game_summaries_df
+    dfs_dict["(BOWL) Game Performances"] = bowl_game_performances_df
+
+    dfs_dict["Awards"] = awards_info_df
+
+    # Return the dataframes
+    return dfs_dict
+
+
+def export_data_joblib(
+    fp: str,
+    rs_match_results: dict[int, list[MatchResults]],
+    rs_trainer_stats: list[TrainerStats],
+    bowl_game_results: dict[str, MatchResults],
+    bowl_trainer_stats: list[TrainerStats],
+    awards: dict[str, dict[str, str]],
+    trainer_replacements: dict[str, str],
+    league_name: str,
+) -> None:
+
+    dfs_dict = build_dataframes(
+        league_name,
+        rs_match_results,
+        rs_trainer_stats,
+        bowl_game_results,
+        bowl_trainer_stats,
+        awards,
+        trainer_replacements,
+    )
+
+    joblib.dump(dfs_dict, fp, compress=("gzip", 3))
+
+
+def export_data_xlsx(
+    fp: str,
+    rs_match_results: dict[int, list[MatchResults]],
+    rs_trainer_stats: list[TrainerStats],
+    bowl_game_results: dict[str, MatchResults],
+    bowl_trainer_stats: list[TrainerStats],
+    awards: dict[str, dict[str, str]],
+    trainer_replacements: dict[str, str],
+    league_name: str,
+    league_icon_fp: str = "",
+) -> None:
+
+    dfs_dict = build_dataframes(
+        league_name,
+        rs_match_results,
+        rs_trainer_stats,
+        bowl_game_results,
+        bowl_trainer_stats,
+        awards,
+        trainer_replacements,
+    )
+    sheet_names = (
+        ######################################
+        #                                    #
+        # Regular season & league worksheets #
+        #                                    #
+        ######################################
+        "League Data",
+        "(RS) Match Summaries",
+        "(RS) Match Performances",
+        "(RS) Trainer Summaries",
+        "(RS) Trainer Pokémon",
+        #########################
+        #                       #
+        # Bowl games worksheets #
+        #                       #
+        #########################
+        "(BOWL) Game Summaries",
+        "(BOWL) Game Performances",
+        ###################
+        #                 #
+        # Award worksheet #
+        #                 #
+        ###################
+        "Awards",
+    )
 
     ##########################
     #                        #
@@ -289,43 +381,8 @@ def export_data_xlsx(
     ##########################
     with pd.ExcelWriter(fp, engine="xlsxwriter") as writer:
 
-        ######################################
-        #                                    #
-        # Regular season & league worksheets #
-        #                                    #
-        ######################################
-        league_data_df.to_excel(writer, sheet_name="League Data", index=False)
-        match_summaries_df.to_excel(
-            writer, sheet_name="(RS) Match Summaries", index=False
-        )
-        rs_match_performances_df.to_excel(
-            writer, sheet_name="(RS) Match Performances", index=False
-        )
-        rs_trainer_summaries_df.to_excel(
-            writer, sheet_name="(RS) Trainer Summaries", index=False
-        )
-        rs_trainer_pokemon_df.to_excel(
-            writer, sheet_name="(RS) Trainer Pokémon", index=False
-        )
-
-        #########################
-        #                       #
-        # Bowl games worksheets #
-        #                       #
-        #########################
-        bowl_game_summaries_df.to_excel(
-            writer, sheet_name="(BOWL) Game Summaries", index=False
-        )
-        bowl_game_performances_df.to_excel(
-            writer, sheet_name="(BOWL) Game Performances", index=False
-        )
-
-        ###################
-        #                 #
-        # Award worksheet #
-        #                 #
-        ###################
-        awards_info_df.to_excel(writer, sheet_name="Awards", index=False)
+        for sheet_name in sheet_names:
+            dfs_dict[sheet_name].to_excel(writer, sheet_name=sheet_name, index=False)
 
         #######################
         #                     #
@@ -372,34 +429,50 @@ def export_data_xlsx(
         league_data_ws.add_table(
             0,
             0,
-            league_data_df.shape[0],
-            league_data_df.shape[1] - 1,
-            {"columns": [{"header": header} for header in league_data_df.columns]},
+            dfs_dict["League Data"].shape[0],
+            dfs_dict["League Data"].shape[1] - 1,
+            {
+                "columns": [
+                    {"header": header} for header in dfs_dict["League Data"].columns
+                ]
+            },
         )
         league_data_ws.set_column(0, 0, 20)
         league_data_ws.set_column(1, 1, 24)
         league_data_ws.write_datetime(1, 1, datetime.now(), format_datetime)
-        league_data_ws.set_column(2, league_data_df.shape[1] - 1, 16)
+        league_data_ws.set_column(2, dfs_dict["League Data"].shape[1] - 1, 16)
         league_data_ws.set_column(
-            league_data_df.shape[1] - 1, league_data_df.shape[1] - 1, 16, format_percent
+            dfs_dict["League Data"].shape[1] - 1,
+            dfs_dict["League Data"].shape[1] - 1,
+            16,
+            format_percent,
         )
 
         match_summaries_ws.add_table(
             0,
             0,
-            match_summaries_df.shape[0],
-            match_summaries_df.shape[1] - 1,
-            {"columns": [{"header": header} for header in match_summaries_df.columns]},
+            dfs_dict["(RS) Match Summaries"].shape[0],
+            dfs_dict["(RS) Match Summaries"].shape[1] - 1,
+            {
+                "columns": [
+                    {"header": header}
+                    for header in dfs_dict["(RS) Match Summaries"].columns
+                ]
+            },
         )
         match_summaries_ws.set_column(0, 0, 8)
-        match_summaries_ws.set_column(1, match_summaries_df.shape[1] - 2, 12)
         match_summaries_ws.set_column(
-            match_summaries_df.shape[1] - 1, match_summaries_df.shape[1] - 1, 100
+            1, dfs_dict["(RS) Match Summaries"].shape[1] - 2, 12
+        )
+        match_summaries_ws.set_column(
+            dfs_dict["(RS) Match Summaries"].shape[1] - 1,
+            dfs_dict["(RS) Match Summaries"].shape[1] - 1,
+            100,
         )
         match_summaries_ws.conditional_format(
             1,
             5,
-            match_summaries_df.shape[0],
+            dfs_dict["(RS) Match Summaries"].shape[0],
             5,
             {
                 "type": "cell",
@@ -412,39 +485,43 @@ def export_data_xlsx(
         rs_match_performances_ws.add_table(
             0,
             0,
-            rs_match_performances_df.shape[0],
-            rs_match_performances_df.shape[1] - 1,
+            dfs_dict["(RS) Match Performances"].shape[0],
+            dfs_dict["(RS) Match Performances"].shape[1] - 1,
             {
                 "columns": [
-                    {"header": header} for header in rs_match_performances_df.columns
+                    {"header": header}
+                    for header in dfs_dict["(RS) Match Performances"].columns
                 ]
             },
         )
         rs_match_performances_ws.set_column(0, 0, 8)
         rs_match_performances_ws.set_column(1, 2, 24)
         rs_match_performances_ws.set_column(
-            3, rs_match_performances_df.shape[1] - 1, 10
+            3, dfs_dict["(RS) Match Performances"].shape[1] - 1, 10
         )
 
         rs_trainer_summaries_ws.add_table(
             0,
             0,
-            rs_trainer_summaries_df.shape[0],
-            rs_trainer_summaries_df.shape[1] - 1,
+            dfs_dict["(RS) Trainer Summaries"].shape[0],
+            dfs_dict["(RS) Trainer Summaries"].shape[1] - 1,
             {
                 "columns": [
-                    {"header": header} for header in rs_trainer_summaries_df.columns
+                    {"header": header}
+                    for header in dfs_dict["(RS) Trainer Summaries"].columns
                 ]
             },
         )
-        rs_trainer_summaries_ws.set_column(0, rs_trainer_summaries_df.shape[1] - 1, 16)
+        rs_trainer_summaries_ws.set_column(
+            0, dfs_dict["(RS) Trainer Summaries"].shape[1] - 1, 16
+        )
         rs_trainer_summaries_ws.set_column(1, 1, 24)
         rs_trainer_summaries_ws.set_column(2, 3, 8)
         rs_trainer_summaries_ws.set_column(4, 4, 12)
         rs_trainer_summaries_ws.conditional_format(
             1,
             4,
-            rs_trainer_summaries_df.shape[0],
+            dfs_dict["(RS) Trainer Summaries"].shape[0],
             4,
             {
                 "type": "3_color_scale",
@@ -454,7 +531,7 @@ def export_data_xlsx(
         rs_trainer_summaries_ws.conditional_format(
             1,
             0,
-            rs_trainer_summaries_df.shape[0],
+            dfs_dict["(RS) Trainer Summaries"].shape[0],
             0,
             {
                 "type": "cell",
@@ -466,7 +543,7 @@ def export_data_xlsx(
         rs_trainer_summaries_ws.conditional_format(
             1,
             0,
-            rs_trainer_summaries_df.shape[0],
+            dfs_dict["(RS) Trainer Summaries"].shape[0],
             0,
             {
                 "type": "cell",
@@ -478,7 +555,7 @@ def export_data_xlsx(
         rs_trainer_summaries_ws.conditional_format(
             1,
             0,
-            rs_trainer_summaries_df.shape[0],
+            dfs_dict["(RS) Trainer Summaries"].shape[0],
             0,
             {
                 "type": "cell",
@@ -490,7 +567,7 @@ def export_data_xlsx(
         rs_trainer_summaries_ws.conditional_format(
             1,
             0,
-            rs_trainer_summaries_df.shape[0],
+            dfs_dict["(RS) Trainer Summaries"].shape[0],
             0,
             {
                 "type": "cell",
@@ -503,18 +580,23 @@ def export_data_xlsx(
         rs_trainer_pokemon_ws.add_table(
             0,
             0,
-            rs_trainer_pokemon_df.shape[0],
-            rs_trainer_pokemon_df.shape[1] - 1,
+            dfs_dict["(RS) Trainer Pokémon"].shape[0],
+            dfs_dict["(RS) Trainer Pokémon"].shape[1] - 1,
             {
                 "columns": [
-                    {"header": header} for header in rs_trainer_pokemon_df.columns
+                    {"header": header}
+                    for header in dfs_dict["(RS) Trainer Pokémon"].columns
                 ]
             },
         )
         rs_trainer_pokemon_ws.set_column(0, 1, 24)
-        rs_trainer_pokemon_ws.set_column(2, rs_trainer_pokemon_df.shape[1] - 3, 12)
         rs_trainer_pokemon_ws.set_column(
-            rs_trainer_pokemon_df.shape[1] - 2, rs_trainer_pokemon_df.shape[1] - 1, 18
+            2, dfs_dict["(RS) Trainer Pokémon"].shape[1] - 3, 12
+        )
+        rs_trainer_pokemon_ws.set_column(
+            dfs_dict["(RS) Trainer Pokémon"].shape[1] - 2,
+            dfs_dict["(RS) Trainer Pokémon"].shape[1] - 1,
+            18,
         )
 
         #########################
@@ -528,32 +610,36 @@ def export_data_xlsx(
         bowl_game_summaries_ws.add_table(
             0,
             0,
-            bowl_game_summaries_df.shape[0],
-            bowl_game_summaries_df.shape[1] - 1,
+            dfs_dict["(BOWL) Game Summaries"].shape[0],
+            dfs_dict["(BOWL) Game Summaries"].shape[1] - 1,
             {
                 "columns": [
-                    {"header": header} for header in bowl_game_summaries_df.columns
+                    {"header": header}
+                    for header in dfs_dict["(BOWL) Game Summaries"].columns
                 ]
             },
         )
         bowl_game_summaries_ws.set_column(0, 3, 24)
         bowl_game_summaries_ws.set_column(4, 4, 12)
-        bowl_game_summaries_ws.set_column(5, bowl_game_summaries_df.shape[1] - 1, 36)
+        bowl_game_summaries_ws.set_column(
+            5, dfs_dict["(BOWL) Game Summaries"].shape[1] - 1, 36
+        )
 
         bowl_game_performances_ws.add_table(
             0,
             0,
-            bowl_game_performances_df.shape[0],
-            bowl_game_performances_df.shape[1],
+            dfs_dict["(BOWL) Game Performances"].shape[0],
+            dfs_dict["(BOWL) Game Performances"].shape[1],
             {
                 "columns": [
-                    {"header": header} for header in bowl_game_performances_df.columns
+                    {"header": header}
+                    for header in dfs_dict["(BOWL) Game Performances"].columns
                 ]
             },
         )
         bowl_game_performances_ws.set_column(0, 2, 24)
         bowl_game_performances_ws.set_column(
-            3, bowl_game_performances_df.shape[1] - 1, 10
+            3, dfs_dict["(BOWL) Game Performances"].shape[1] - 1, 10
         )
 
         #####################
@@ -566,8 +652,8 @@ def export_data_xlsx(
         awards_info_ws.add_table(
             0,
             0,
-            awards_info_df.shape[0],
-            awards_info_df.shape[1] - 1,
-            {"columns": [{"header": header} for header in awards_info_df.columns]},
+            dfs_dict["Awards"].shape[0],
+            dfs_dict["Awards"].shape[1] - 1,
+            {"columns": [{"header": header} for header in dfs_dict["Awards"].columns]},
         )
-        awards_info_ws.set_column(0, awards_info_df.shape[1] - 1, 36)
+        awards_info_ws.set_column(0, dfs_dict["Awards"].shape[1] - 1, 36)

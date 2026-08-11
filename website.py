@@ -1,5 +1,6 @@
 import datetime
 import glob
+import joblib
 import streamlit as st
 import pandas as pd
 from typing import Literal
@@ -11,9 +12,9 @@ def read_input_xlsx_files() -> list[dict[str, pd.DataFrame]]:
 
     dataframes: list[dict[str, pd.DataFrame]] = []
 
-    for filepath in list(glob.glob(INPUT_FOLDER + "*.xlsx")):
+    for filepath in list(glob.glob(INPUT_FOLDER + "*.gzip")):
 
-        dataframes.append(pd.read_excel(filepath, sheet_name=None, engine="openpyxl"))
+        dataframes.append(joblib.load(filepath))
 
     return dataframes
 

@@ -153,3 +153,13 @@ if __name__ == "__main__":
         "Viral Akdraft Season 2",
         "./input/season_2/ChatDiPiTi.png",
     )
+    exporters.export_data_joblib(
+        "./output/season 2.gzip",
+        rs_schedule_results,
+        rs_results_parser.trainer_stats,
+        bowl_schedule_results,
+        bowl_results_parser.trainer_stats,
+        awards_info,
+        replacements,
+        "Viral Akdraft Season 2",
+    )
