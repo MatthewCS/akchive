@@ -33,7 +33,7 @@ def landing():
     ):
         with st.container(border=True, width="content", height="content"):
             st.image(
-                "app/static/geoff.png",
+                "static/geoff.png",
                 caption='"We\'re so excited to play our next games!" -Geoff K.',
                 width="content",
             )
@@ -320,7 +320,7 @@ The season is **{percent_complete}%** comple!""".format(
 
 def build_website(input_data: list[dict[str, pd.DataFrame]]):
 
-    st.logo("app/static/flamigo.png", size="large")
+    st.logo("static/flamigo.png", size="large")
 
     pages: dict[str, list[st.Page]] = {"Info": [], "Seasons": []}
 
