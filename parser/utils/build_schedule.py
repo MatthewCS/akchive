@@ -75,7 +75,7 @@ def get_schedule_results(
                     ][0]
 
                     winner: str | None = None
-                    dq_info = "The match was not scheduled, so this game is counted as a DQ for both players."
+                    dq_info = "The match was not scheduled, so this game is counted as a loss for both players."
                     if dq_p1_info["Win Credited"]:
                         winner = dq_p1_info["Player"]
                         dq_info = f"{winner} attempted to schedule this match and is credited with the win."

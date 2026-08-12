@@ -107,7 +107,6 @@ if __name__ == "__main__":
     rs_trainer_stats = rs_results_parser.trainer_stats
     for round in rs_schedule_results:
         for result in rs_schedule_results[round]:
-            print(result)
             if result.disqualified:
                 player_1_idx = [
                     i
