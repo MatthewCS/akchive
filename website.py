@@ -52,7 +52,6 @@ def build_matches(round: int | str, round_df, count_games_in_round: bool = True)
         games_played = len(
             round_df.loc[(~round_df["Disqualified"]) & (round_df["Winner"] != "")]
         )
-        print(round_df.loc[(round_df["Disqualified"]) & (round_df["Winner"] != "")])
         games_disqualified = len(round_df.loc[round_df["Disqualified"]])
         games_unplayed = games_in_round - games_played - games_disqualified
 
