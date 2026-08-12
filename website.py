@@ -49,15 +49,30 @@ def build_matches(round: int | str, round_df, count_games_in_round: bool = True)
     if count_games_in_round:
         # How many games in this round have been played?
         games_in_round = round_df.shape[0]
-        games_unplayed = round_df[round_df["Winner"] == ""].shape[0]
-        games_played = games_in_round - games_unplayed
+        games_played = len(
+            round_df.loc[(~round_df["Disqualified"]) & (round_df["Winner"] != "")]
+        )
+        print(round_df.loc[(round_df["Disqualified"]) & (round_df["Winner"] != "")])
+        games_disqualified = len(round_df.loc[round_df["Disqualified"]])
+        games_unplayed = games_in_round - games_played - games_disqualified
 
+        md_str = ""
         # If all games have been played
-        if games_unplayed == 0:
-            st.text(f"All {games_in_round} matches have been played!")
+        if games_played + games_disqualified == games_in_round:
+            md_str += (
+                "This round is finished!  \n"
+                + f"**{games_played}** matches have been played. "
+            )
         else:
-            st.text(f"{games_played} matches have been played.")
-            st.markdown(f"**{games_unplayed} matches have yet to be played!**")
+            md_str = (
+                f"**{games_played}** matches have been played. "
+                + f"**{games_unplayed}** matches have yet to be played!"
+            )
+        if games_disqualified > 0:
+            md_str += "  \n"
+            md_str += f"**{games_disqualified}** disqualifications were given."
+
+        st.markdown(md_str)
 
     for _, row in round_df.iterrows():
         with st.container(border=True):
@@ -72,8 +87,11 @@ def build_matches(round: int | str, round_df, count_games_in_round: bool = True)
                     vs. **{p2}**""".format(p1=row["Player 1"], p2=row["Player 2"]))
 
             with right:
+                # Is this game a DQ?
+                if "Disqualified" in row and row["Disqualified"]:
+                    st.markdown(f"**Disqualified**  \n{row["DQ Info"]}")
                 # Has this game been played yet?
-                if row["Winner"]:
+                elif row["Winner"]:
                     st.markdown(
                         f"Winner: **{row["Winner"]}** (**+{row["Margin of Victory"]}**)"
                     )
