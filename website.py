@@ -280,7 +280,35 @@ The season is **{percent_complete}%** comple!""".format(
 
     with postseason:
 
-        st.text("WIP!")
+        st.caption(f"Postseason statistics for {league_name}")
+
+        match_summaries, match_performances, trainer_pokemon = st.tabs(
+            [
+                "Match Summaries",
+                "Match Performances",
+                "Trainer Pokémon",
+            ]
+        )
+
+        with match_summaries:
+
+            match_summaries_df = frames["(PS) Match Summaries"]
+            build_schedule_tab(match_summaries_df, style="Tab")
+
+        with match_performances:
+
+            match_performances_df = frames["(PS) Match Performances"]
+
+            st.dataframe(
+                match_performances_df,
+                hide_index=True,
+            )
+
+        with trainer_pokemon:
+
+            trainer_pokemon_df = frames["(PS) Trainer Pokémon"]
+
+            st.dataframe(trainer_pokemon_df, hide_index=True)
 
     with awards:
 

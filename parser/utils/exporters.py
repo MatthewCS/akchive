@@ -10,6 +10,8 @@ def build_dataframes(
     rs_trainer_stats: list[TrainerStats],
     bowl_game_results: dict[str, MatchResults],
     bowl_trainer_stats: list[TrainerStats],
+    ps_match_results: dict[int, list[MatchResults]],
+    ps_trainer_stats: list[TrainerStats],
     awards: dict[str, dict[str, str]],
     trainer_replacements: dict[str, str],
 ) -> dict[str, pd.DataFrame]:
@@ -220,7 +222,6 @@ def build_dataframes(
     # Bowl game data #
     #                #
     ##################
-
     bowl_summary_headers = (
         "Bowl Game",
         "Player 1",
@@ -271,6 +272,78 @@ def build_dataframes(
         bowl_game_performances, columns=bowl_performances_headers, index=None
     )
 
+    ####################
+    #                  #
+    # Poastseason data #
+    #                  #
+    ####################
+    ps_match_summaries = [
+        [
+            round,
+            match.player_1,
+            match.player_2,
+            match.winner,
+            match.margin_of_victory,
+            match.replay_url,
+            match.disqualified,
+            match.dq_info,
+        ]
+        for round in ps_match_results
+        for match in ps_match_results[round]
+    ]
+    ps_match_performances = []
+    for round in ps_match_results:
+        for match in ps_match_results[round]:
+            for pokemon in match.player_1_pokemon + match.player_2_pokemon:
+                ps_match_performances.append(
+                    [
+                        round,
+                        pokemon.trainer,
+                        pokemon.name,
+                        pokemon.direct_kills + pokemon.passive_kills,
+                        pokemon.direct_kills,
+                        pokemon.passive_kills,
+                        pokemon.deaths,
+                    ]
+                )
+    ps_trainer_pokemon = [
+        [
+            pokemon.name,
+            trainer.name,
+            pokemon.direct_kills + pokemon.passive_kills,
+            pokemon.direct_kills,
+            pokemon.passive_kills,
+            pokemon.deaths,
+            pokemon.matches_played,
+            (pokemon.direct_kills + pokemon.passive_kills) / pokemon.matches_played,
+            pokemon.deaths / pokemon.matches_played,
+        ]
+        for trainer in ps_trainer_stats
+        for pokemon in trainer.pokemon.values()
+    ]
+
+    ps_match_summaries_df = pd.DataFrame(
+        ps_match_summaries, columns=matches_summary_headers, index=None
+    )
+    ps_match_performances_df = pd.DataFrame(
+        ps_match_performances, columns=match_performances_headers, index=None
+    )
+    ps_match_performances_df.sort_values(
+        ["Round", "Pokémon Trainer", "Pokémon Name"],
+        ascending=[True, True, True],
+        key=lambda col: col.str.lower() if col.dtype == "str" else col,
+        inplace=True,
+    )
+    ps_trainer_pokemon_df = pd.DataFrame(
+        ps_trainer_pokemon, columns=trainer_pokemon_headers, index=None
+    )
+    ps_trainer_pokemon_df.sort_values(
+        ["Pokémon Trainer", "Pokémon Name"],
+        ascending=[True, True],
+        key=lambda col: col.str.lower(),
+        inplace=True,
+    )
+
     ###############
     #             #
     # Awards data #
@@ -296,10 +369,14 @@ def build_dataframes(
     dfs_dict["(RS) Match Summaries"] = rs_match_summaries_df
     dfs_dict["(RS) Match Performances"] = rs_match_performances_df
     dfs_dict["(RS) Trainer Summaries"] = rs_trainer_summaries_df
-    dfs_dict["(RS) Trainer Pokémon"] = rs_trainer_summaries_df
+    dfs_dict["(RS) Trainer Pokémon"] = rs_trainer_pokemon_df
 
     dfs_dict["(BOWL) Game Summaries"] = bowl_game_summaries_df
     dfs_dict["(BOWL) Game Performances"] = bowl_game_performances_df
+
+    dfs_dict["(PS) Match Summaries"] = ps_match_summaries_df
+    dfs_dict["(PS) Match Performances"] = ps_match_performances_df
+    dfs_dict["(PS) Trainer Pokémon"] = ps_trainer_pokemon_df
 
     dfs_dict["Awards"] = awards_info_df
 
@@ -313,6 +390,8 @@ def export_data_joblib(
     rs_trainer_stats: list[TrainerStats],
     bowl_game_results: dict[str, MatchResults],
     bowl_trainer_stats: list[TrainerStats],
+    ps_match_results: dict[int, list[MatchResults]],
+    ps_trainer_stats: list[TrainerStats],
     awards: dict[str, dict[str, str]],
     trainer_replacements: dict[str, str],
     league_name: str,
@@ -324,6 +403,8 @@ def export_data_joblib(
         rs_trainer_stats,
         bowl_game_results,
         bowl_trainer_stats,
+        ps_match_results,
+        ps_trainer_stats,
         awards,
         trainer_replacements,
     )
@@ -337,6 +418,8 @@ def export_data_xlsx(
     rs_trainer_stats: list[TrainerStats],
     bowl_game_results: dict[str, MatchResults],
     bowl_trainer_stats: list[TrainerStats],
+    ps_match_results: dict[int, list[MatchResults]],
+    ps_trainer_stats: list[TrainerStats],
     awards: dict[str, dict[str, str]],
     trainer_replacements: dict[str, str],
     league_name: str,
@@ -349,6 +432,8 @@ def export_data_xlsx(
         rs_trainer_stats,
         bowl_game_results,
         bowl_trainer_stats,
+        ps_match_results,
+        ps_trainer_stats,
         awards,
         trainer_replacements,
     )
@@ -363,6 +448,14 @@ def export_data_xlsx(
         "(RS) Match Performances",
         "(RS) Trainer Summaries",
         "(RS) Trainer Pokémon",
+        #########################
+        #                       #
+        # Postseason worksheets #
+        #                       #
+        #########################
+        "(PS) Match Summaries",
+        "(PS) Match Performances",
+        "(PS) Trainer Pokémon",
         #########################
         #                       #
         # Bowl games worksheets #

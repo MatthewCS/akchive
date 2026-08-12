@@ -142,6 +142,13 @@ if __name__ == "__main__":
         bowl_schedule, bowl_results_parser.results
     )
 
+    # Playoffs
+    ps_schedule = update_names_in_schedule(aliases["schedule names"], ps_schedule)
+    ps_results_parser = ResultsParser(ps_contents, divisions, aliases, replacements)
+    ps_schedule_results = get_schedule_results(
+        ps_schedule, ps_results_parser.results, {}
+    )
+
     print("Parsed results files")
 
     # Zoroark-H breaks Porygon, so I want to see a list of every game it played in.
@@ -173,18 +180,14 @@ if __name__ == "__main__":
             )
     print("Please ensure that each of the listed games is accurate!")
 
-    # print(results_parser)
-
-    # for trainer in results_parser.trainer_stats:
-    #     print(str(trainer))
-    #     print("==============================")
-
     exporters.export_data_xlsx(
         "./output/season 2.xlsx",
         rs_schedule_results,
         rs_trainer_stats,
         bowl_schedule_results,
         bowl_results_parser.trainer_stats,
+        ps_schedule_results,
+        ps_results_parser.trainer_stats,
         awards_info,
         replacements,
         "Viral Akdraft Season 2",
@@ -196,6 +199,8 @@ if __name__ == "__main__":
         rs_trainer_stats,
         bowl_schedule_results,
         bowl_results_parser.trainer_stats,
+        ps_schedule_results,
+        ps_results_parser.trainer_stats,
         awards_info,
         replacements,
         "Viral Akdraft Season 2",

@@ -25,16 +25,19 @@ def get_schedule_results(
 
         for trainers in raw_schedule[round]:
 
-            match_has_been_played = (
-                len(
-                    [
-                        1
-                        for match_result in results[round]
-                        if match_result.has_trainers(trainers)
-                    ]
+            match_has_been_played = False
+            # If this game is TBD, ignore it. Otherwise, check if it's been played.
+            if not (trainers[0] == "TBD" and trainers[1] == "TBD"):
+                match_has_been_played = (
+                    len(
+                        [
+                            1
+                            for match_result in results[round]
+                            if match_result.has_trainers(trainers)
+                        ]
+                    )
+                    > 0
                 )
-                > 0
-            )
 
             if not match_has_been_played:
                 dummy_mr = MatchResults()
@@ -170,10 +173,16 @@ def update_names_in_schedule(
 
         for match in schedule[round]:
 
+            name_1 = match[0]
+            name_2 = match[1]
+            if name_1 in names_dict:
+                name_1 = names_dict[name_1]
+            if name_2 in names_dict:
+                name_2 = names_dict[name_2]
             results[round].append(
                 [
-                    names_dict[match[0]],
-                    names_dict[match[1]],
+                    name_1,
+                    name_2,
                 ]
             )
 
