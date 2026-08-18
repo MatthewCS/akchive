@@ -25,9 +25,6 @@ def get_schedule_results(
 
         for trainers in raw_schedule[round]:
 
-            if round == 3:
-                print(trainers)
-
             match_has_been_played = False
             # If this game is TBD, ignore it. Otherwise, check if it's been played.
             if not (trainers[0] == "TBD" or trainers[1] == "TBD"):
